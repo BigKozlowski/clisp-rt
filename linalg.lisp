@@ -167,8 +167,6 @@
                              (when generator `(:generator #'(lambda (,i ,j) (funcall ,generator ,j)))))))
       (t (error "Unknown :orientation '~A'" orientation)))))
 
-(make-vector 5 :data #(1.0 2.0 3.0 4.0 5.0))
-
 (defmacro vec-x (v)
   `(aref (matrix-data ,v) 0))
 
