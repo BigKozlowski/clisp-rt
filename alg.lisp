@@ -147,7 +147,7 @@
 (def-elementwise-op-fun m+ #'+)
 (def-elementwise-op-fun m- #'-)
 
-(defmacro make-vector (dim &key (orientation :column) generator)
+(defmacro make-vector (dim &key (orientation :column) data generator)
   (let ((i (gensym))
         (j (gensym)))
     (case orientation
@@ -155,13 +155,19 @@
        `(make-instance 'matrix
                        :rows ,dim
                        :cols 1
-                       ,@(when generator `(:generator #'(lambda (,i ,j) (funcall ,generator ,i))))))
+                       ,@(if data
+                             `(:data ,data)
+                             (when generator `(:generator #'(lambda (,i ,j) (funcall ,generator ,i)))))))
       (:row
        `(make-instance 'matrix
                        :rows 1
                        :cols ,dim
-                       ,@(when generator `(:generator #'(lambda (,i ,j) (funcall ,generator ,j))))))
+                       ,@(if data
+                             `(:data ,data)
+                             (when generator `(:generator #'(lambda (,i ,j) (funcall ,generator ,j)))))))
       (t (error "Unknown :orientation '~A'" orientation)))))
+
+(make-vector 5 :data #(1.0 2.0 3.0 4.0 5.0))
 
 (defmacro vec-x (v)
   `(aref (matrix-data ,v) 0))
