@@ -96,6 +96,8 @@
                  ,@body))
              body))))
 
+(defgeneric m* (op1 op2))
+
 (defmethod m* ((a matrix) (b matrix))
   (assert (= (matrix-cols a) (matrix-rows b)))
   (let ((result (make-instance 'matrix
@@ -104,16 +106,22 @@
     (do-matrix (result i j elt)
       (dotimes (k (matrix-cols a))
         (incf elt
-              (* (matrix-at a i k) (matrix-at b k j)))))))
+              (* (matrix-at a i k) (matrix-at b k j)))))
+    (if (= 1 (matrix-cols result) (matrix-rows result))
+        (aref (matrix-data result) 0)
+        result)))
 
-(defmethod m* ((m matrix) (s real))
+(defmethod m* ((m matrix) (s single-float))
   (make-instance 'matrix
                  :rows (matrix-rows m)
                  :cols (matrix-cols m)
-                 :data (map 'vector #'(lambda (i) (* i s)) (matrix-data m))))
+                 :data (map '(simple-array single-float 1) #'(lambda (i) (* i s)) (matrix-data m))))
 
-(defmethod m* ((s real) (m matrix))
+(defmethod m* ((s single-float) (m matrix))
   (m* m s))
+
+(defmethod m* ((a single-float) (b single-float))
+  (* a b))
 
 (defmethod mult (&rest operands)
   (when (consp operands)
@@ -173,7 +181,7 @@
         (make-instance 'matrix
                        :rows (matrix-rows v)
                        :cols (matrix-cols v)
-                       :data (map 'vector #'(lambda (i) (/ i s)) (matrix-data v)))
+                       :data (map '(simple-array single-float 1) #'(lambda (i) (/ i s)) (matrix-data v)))
         (copy-matrix v))))
 
 (defun is-3d-vec? (v)
