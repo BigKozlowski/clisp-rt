@@ -34,19 +34,19 @@
          (miny (- maxy))
          (stepx (/ (* 2.0 maxx) (coerce width 'single-float)))
          (stepy (/ (* 2.0 maxy) (coerce height 'single-float))))
-    (do ((y 0.0 (+ y 1.0)))
+    (do ((y 0 (1+ y)))
         ((>= y height))
-      (do* ((x 0.0 (+ x 1.0))
+      (do* ((x 0 (1+ x))
             (x-coord (+ minx (* x stepx)))
-            (y-coord (+ miny (* y stepy)))
+            (y-coord (+ miny (* x stepy)))
             (ray-dir (make-vector 3 :data (make-array 3
                                                       :element-type 'single-float
                                                       :initial-contents (vector x-coord y-coord 1.0)))
                      (make-vector 3 :data (make-array 3
                                                       :element-type 'single-float
                                                       :initial-contents (vector x-coord y-coord 1.0)))))
-           ((>= x maxx))
-        (setf (aref image-data (truncate y) (truncate x) 2) 255)))
+           ((>= x width))
+        (setf (aref image-data (truncate y) (truncate x) 1) 255)))
     (zpng:write-png image filename :if-exists :supersede)))
 
 
