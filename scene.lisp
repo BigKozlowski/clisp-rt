@@ -54,8 +54,7 @@
                                                            (m- image-plane-pos zero-vector))))))
           (setf (aref image-data y x 0) (first color)
                 (aref image-data y x 1) (second color)
-                (aref image-data y x 2) (third color)))
-        (setf (aref image-data (truncate y) (truncate x) 1) 255)))
+                (aref image-data y x 2) (third color)))))
     (zpng:write-png image filename :if-exists :supersede)))
 
 (defun find-closest-intersection (scene ray lower-bound shadow-feeler)
