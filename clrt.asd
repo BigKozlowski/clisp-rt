@@ -6,5 +6,7 @@
   :components
   ((:file "linalg")
    (:file "camera" :depends-on ("linalg"))
-   (:file "objects" :depends-on ("linalg" "camera"))
-   (:file "scene" :depends-on ("camera" "objects" "linalg"))))
+   (:file "objects" :depends-on ("linalg" "camera" "ray"))
+   (:file "scene" :depends-on ("camera" "objects" "linalg"))
+   (:file "sphere" :depends-on ("objects" "linalg"))
+   (:file "ray" :depends-on ("linalg"))))

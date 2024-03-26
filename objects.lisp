@@ -1,5 +1,5 @@
 (defpackage #:clrt-objects
-  (:use #:cl #:linalg #:clrt-camera)
+  (:use #:cl #:linalg #:clrt-camera #:clrt-ray)
   (:export #:object
            #:object-material
            #:intersects
@@ -7,17 +7,23 @@
 
 (in-package #:clrt-objects)
 
+
+
 (defclass object ()
   ((center
     :initarg :center
     :initform (error ":center must be specified.")
-    :type matrix)
+    :type matrix
+    :reader object-center)
    (material
     :reader object-material)))
 
-(defgeneric intersects (obj ray))
+(defgeneric intersects (obj ray &key lower-bound shadow-feeler))
 
 (defgeneric finalize (obj cam))
 
 (defmethod finalize ((obj object) (cam camera))
-  T)
+  (setf (slot-value obj 'center)
+        (world->view cam (slot-value obj 'center))))
+
+

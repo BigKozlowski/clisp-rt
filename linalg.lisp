@@ -16,7 +16,8 @@
            #:vec-z
            #:vec-length
            #:normalized
-           #:cross))
+           #:cross
+           #:dot))
 
 (in-package #:linalg)
 
@@ -207,3 +208,12 @@
                                                                  (* (vec-z b) (vec-x a)))
                                                               (- (* (vec-x a) (vec-y b))
                                                                  (* (vec-x b) (vec-y a)))))))
+
+(defun is-vector? (v)
+  (or (= (matrix-cols v) 1)
+      (= (matrix-rows v) 1)))
+
+(defun dot (a b)
+  (assert (is-vector? a))
+  (assert (is-vector? b))
+  (reduce #'+ (map 'vector #'* (matrix-data a) (matrix-data b))))
