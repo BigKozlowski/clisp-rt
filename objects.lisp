@@ -3,7 +3,11 @@
   (:export #:object
            #:object-material
            #:intersects
-           #:finalize))
+           #:finalize
+           #:min-in-range
+           #:object-center
+           #:sphere
+           #:sphere-radius))
 
 (in-package #:clrt-objects)
 
@@ -26,4 +30,11 @@
   (setf (slot-value obj 'center)
         (world->view cam (slot-value obj 'center))))
 
-
+(defun min-in-range (elements &key (lower-bound 0.0) upper-bound)
+  (let ((elts (remove-if-not #'(lambda (i)
+                                 (if upper-bound
+                                     (<= lower-bound i upper-bound)
+                                     (<= lower-bound i)))
+                             elements)))
+    (when elts
+      (apply #'min elts))))

@@ -5,7 +5,7 @@
            #:ray-origin
            #:ray-direction))
 
-(in-package #:clrt-package)
+(in-package #:clrt-ray)
 
 (defclass ray ()
   ((origin
@@ -20,9 +20,9 @@
     :reader ray-direction)))
 
 (defmethod initialize-instance :after ((ray ray) &key)
-  (assert (<= (- 1 single-float-epsilon)
+  (assert (<= (- 0.9999 single-float-epsilon)
               (dot (ray-direction ray) (ray-direction ray))
-              (+ 1 single-float-epsilon))
+              1.0001)
           nil
           ":direction must be a unit-length vector."))
 
