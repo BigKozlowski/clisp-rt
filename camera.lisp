@@ -57,4 +57,4 @@
                                                                        (vec-z dir))))))))
 
 (defun world->view (cam vec)
-  (m* (w2v-matrix cam) vec))
+  (m* (w2v-matrix cam) (m- vec (camera-pos cam))))

@@ -2,7 +2,9 @@
   (:use #:cl #:clrt-camera #:clrt-objects #:linalg)
   (:export #:scene
            #:add-object
-           #:render))
+           #:clear-scene
+           #:render
+           #:scene-objects))
 
 (in-package #:clrt-scene)
 
@@ -17,12 +19,19 @@
     :reader scene-objects)
    (lights
     :initform '()
-    :reader scene-objects)))
+    :reader scene-lights)
+   already-finalized))
 
 (defun add-object (scene object)
   (push object (slot-value scene 'objects)))
 
+(defun clear-scene (scene)
+  (setf (slot-value scene 'objects) '()))
+
 (defun render (scene width height filename)
+  (unless (slot-boundp scene 'already-finalized)
+    (dolist (obj (scene-objects scene))
+      (finalize obj (scene-camera scene))))
   (let* ((image (make-instance 'zpng:png
                                :width width
                                :height height))
@@ -51,7 +60,7 @@
         (let ((color (trace-ray scene (make-instance 'clrt-ray:ray
                                                :origin image-plane-pos
                                                :direction (normalized
-                                                           (m- image-plane-pos zero-vector))))))
+                                                           (m- image-plane-pos zero-vector))) 0.0 100.0)))
           (setf (aref image-data y x 0) (first color)
                 (aref image-data y x 1) (second color)
                 (aref image-data y x 2) (third color)))))
@@ -61,12 +70,15 @@
   (let ((closest-match))
     (dolist (obj (scene-objects scene) closest-match)
       (let ((intersection-point (intersects obj ray :lower-bound lower-bound :shadow-feeler shadow-feeler)))
-        (if closest-match
-            (setf closest-match
-                  (if (<= (car intersection-point) (car closest-match))
-                      intersection-point
-                      closest-match))
-            (setf closest-match intersection-point))))))
+        (when intersection-point
+          (if closest-match
+              (setf closest-match
+                    (if (<= (car intersection-point) (car closest-match))
+                        intersection-point
+                        closest-match))
+              (setf closest-match intersection-point)))))))
+          
+
 
 (defun trace-ray (scene ray &optional (lower-bound 0.0) shadow-feeler)
   (let ((closest-match (find-closest-intersection scene ray lower-bound shadow-feeler)))
