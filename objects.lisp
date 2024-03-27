@@ -7,7 +7,8 @@
            #:min-in-range
            #:object-center
            #:sphere
-           #:sphere-radius))
+           #:sphere-radius
+           #:cube))
 
 (in-package #:clrt-objects)
 
@@ -38,3 +39,29 @@
                              elements)))
     (when elts
       (apply #'min elts))))
+
+(defun intersects-face (origin up right ray test-fn)
+  (let* ((a (vec-x right))
+         (b (vec-x up))
+         (c (- (vec-x (ray-direction ray))))
+         (d (vec-y right))
+         (e (vec-y up))
+         (f (- (vec-y (ray-direction ray))))
+         (g (vec-z right))
+         (h (vec-z up))
+         (i (- (vec-z (ray-direction ray))))
+         (det (- (+ (* a e i) (* b f g) (* c d h))
+                 (+ (* c e g) (* b d i) (* a f h)))))
+    (when (/= det 0)
+      (let* ((rhs (m- (ray-origin ray) origin))
+            (u (+ (* (- (* e i) (* f h)) (vec-x rhs))
+                  (* (- (* c h) (* b i)) (vec-y rhs))
+                  (* (- (* b f) (* c e)) (vec-z rhs))))
+            (v (+ (* (- (* f g) (* d i)) (vec-x rhs))
+                  (* (- (* a i) (* c g)) (vec-y rhs))
+                  (* (- (* c d) (* a f)) (vec-z rhs))))
+            (dist (+ (* (- (* d h) (* e g)) (vec-x rhs))
+                  (* (- (* b g) (* a h)) (vec-y rhs))
+                  (* (- (* a e) (* b d)) (vec-z rhs)))))
+        (when (funcall test-fn u v)
+          (values dist u v))))))
