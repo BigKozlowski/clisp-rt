@@ -1,5 +1,5 @@
 (defpackage #:clrt-objects
-  (:use #:cl #:linalg #:clrt-camera #:clrt-ray)
+  (:use #:cl #:linalg #:clrt-camera #:clrt-ray #:clrt-material)
   (:export #:object
            #:object-material
            #:intersects
@@ -21,6 +21,9 @@
     :type matrix
     :reader object-center)
    (material
+    :initarg :material
+    :initform (error ":material must be specified.")
+    :type material
     :reader object-material)))
 
 (defgeneric intersects (obj ray &key lower-bound shadow-feeler))
@@ -31,14 +34,17 @@
   (setf (slot-value obj 'center)
         (world->view cam (slot-value obj 'center))))
 
-(defun min-in-range (elements &key (lower-bound 0.0) upper-bound)
+(defun min-in-range (elements &key (lower-bound 0.0) upper-bound (key #'identity))
   (let ((elts (remove-if-not #'(lambda (i)
                                  (if upper-bound
                                      (<= lower-bound i upper-bound)
                                      (<= lower-bound i)))
-                             elements)))
+                             elements :key key)))
     (when elts
-      (apply #'min elts))))
+      (reduce #'(lambda (a b) (if (<= (funcall key a) (funcall key b))
+                                  a
+                                  b))
+              elts))))
 
 (defun intersects-face (origin up right ray test-fn)
   (let* ((a (vec-x right))
@@ -54,14 +60,14 @@
                  (+ (* c e g) (* b d i) (* a f h)))))
     (when (/= det 0)
       (let* ((rhs (m- (ray-origin ray) origin))
-            (u (+ (* (- (* e i) (* f h)) (vec-x rhs))
-                  (* (- (* c h) (* b i)) (vec-y rhs))
-                  (* (- (* b f) (* c e)) (vec-z rhs))))
-            (v (+ (* (- (* f g) (* d i)) (vec-x rhs))
-                  (* (- (* a i) (* c g)) (vec-y rhs))
-                  (* (- (* c d) (* a f)) (vec-z rhs))))
-            (dist (+ (* (- (* d h) (* e g)) (vec-x rhs))
-                  (* (- (* b g) (* a h)) (vec-y rhs))
-                  (* (- (* a e) (* b d)) (vec-z rhs)))))
+             (u (/ (+ (* (- (* e i) (* f h)) (vec-x rhs))
+                      (* (- (* c h) (* b i)) (vec-y rhs))
+                      (* (- (* b f) (* c e)) (vec-z rhs))) det))
+             (v (/ (+ (* (- (* f g) (* d i)) (vec-x rhs))
+                      (* (- (* a i) (* c g)) (vec-y rhs))
+                      (* (- (* c d) (* a f)) (vec-z rhs))) det))
+             (dist (/ (+ (* (- (* d h) (* e g)) (vec-x rhs))
+                         (* (- (* b g) (* a h)) (vec-y rhs))
+                         (* (- (* a e) (* b d)) (vec-z rhs))) det)))
         (when (funcall test-fn u v)
           (values dist u v))))))

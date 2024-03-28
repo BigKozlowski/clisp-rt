@@ -10,6 +10,7 @@
            #:mult
            #:m+
            #:m-
+           #:m.
            #:make-vector
            #:vec-x
            #:vec-y
@@ -147,6 +148,7 @@
 
 (def-elementwise-op-fun m+ #'+)
 (def-elementwise-op-fun m- #'-)
+(def-elementwise-op-fun m. #'*)
 
 (defmacro make-vector (dim &key (orientation :column) data generator)
   (let ((i (gensym))
