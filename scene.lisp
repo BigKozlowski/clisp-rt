@@ -34,6 +34,12 @@
   (setf (slot-value scene 'objects) '()))
 
 (defun render (scene width height filename)
+  (assert (consp (slot-value scene 'objects))
+          nil
+          "There are no objects in the scene")
+  (assert (consp (slot-value scene 'lights))
+          nil
+          "There are no lights in the scene")
   (unless (slot-boundp scene 'already-finalized)
     (progn
       (dolist (obj (scene-objects scene))
